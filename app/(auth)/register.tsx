@@ -18,14 +18,10 @@ import {
 } from "react-native";
 import SnaplyLogo from "@/assets/images/logos/snaply.png";
 import { navigate } from "expo-router/build/global-state/routing";
+import { LinearGradient } from "expo-linear-gradient";
 
 const Register = () => {
   const router = useRouter();
-  // const [form, setForm] = useState({
-  //   name: "",
-  //   email: "",
-  //   password: "",
-  // });
 
   const { showLoader, hideLoader, isLoading } = useLoader();
 
@@ -65,26 +61,29 @@ const Register = () => {
   const handleGoogleRegister = async () => {
     if (isLoading) return;
 
-  try {
-    showLoader();
+    try {
+      showLoader();
 
-    // Attempt Google sign-in
-    const user = await signInWithGoogle(); // Make this return user info on success
+      // Attempt Google sign-in
+      const user = await signInWithGoogle(); // Make this return user info on success
 
-    if (!user) {
-      // Failed login
-      Alert.alert("Google Sign-In failed", "Please try again.");
-      return;
+      if (!user) {
+        // Failed login
+        Alert.alert("Google Sign-In failed", "Please try again.");
+        return;
+      }
+
+      // Only navigate on success
+      navigate("/home");
+    } catch (error: any) {
+      console.log("Google Login Error:", error);
+      Alert.alert(
+        "Google Sign-In failed",
+        error?.message || "Please try again"
+      );
+    } finally {
+      hideLoader();
     }
-
-    // Only navigate on success
-    navigate("/home"); 
-  } catch (error: any) {
-    console.log("Google Login Error:", error);
-    Alert.alert("Google Sign-In failed", error?.message || "Please try again");
-  } finally {
-    hideLoader();
-  }
   };
 
   return (
@@ -183,12 +182,22 @@ const Register = () => {
 
           {/* Action Buttons */}
           <View className="mt-10 space-y-4">
-            <TouchableOpacity onPress={handleRegister} activeOpacity={0.8}>
-              <Text className="text-white text-center font-bold text-lg">
-                Register
-              </Text>
-            </TouchableOpacity>
-
+            <LinearGradient
+              colors={["#22d3ee", "#2563eb"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={{ borderRadius: 16 }}
+            >
+              <TouchableOpacity
+                onPress={handleRegister}
+                activeOpacity={0.8}
+                style={{ paddingVertical: 12 }}
+              >
+                <Text className="text-white text-center font-bold text-lg">
+                  Register
+                </Text>
+              </TouchableOpacity>
+            </LinearGradient>
 
             <View className="flex-row justify-center items-center mt-6">
               <Text className="text-zinc-500">Already have an account? </Text>

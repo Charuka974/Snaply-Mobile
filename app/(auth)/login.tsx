@@ -5,7 +5,7 @@ import { useGoogleAuth } from "@/services/googleAuth";
 import { useRouter } from "expo-router";
 import { navigate } from "expo-router/build/global-state/routing";
 import React, { useState } from "react";
-// import { LinearGradient } from "expo-linear-gradient";
+import { LinearGradient } from "expo-linear-gradient";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -28,9 +28,6 @@ const Login = () => {
   const { signInWithGoogle } = useGoogleAuth();
 
   const handleLogin = async () => {
-    // Add your login logic here
-    // console.log("Logging in with:", email, password);
-    // navigate("/home");
     if (isLoading) return;
 
     if (!email || !password) {
@@ -52,26 +49,29 @@ const Login = () => {
   const handleGoogleLogin = async () => {
     if (isLoading) return;
 
-  try {
-    showLoader();
+    try {
+      showLoader();
 
-    // Attempt Google sign-in
-    const user = await signInWithGoogle(); // Make this return user info on success
+      // Attempt Google sign-in
+      const user = await signInWithGoogle(); // Make this return user info on success
 
-    if (!user) {
-      // Failed login
-      Alert.alert("Google Sign-In failed", "Please try again.");
-      return;
+      if (!user) {
+        // Failed login
+        Alert.alert("Google Sign-In failed", "Please try again.");
+        return;
+      }
+
+      // Only navigate on success
+      navigate("/home");
+    } catch (error: any) {
+      console.log("Google Login Error:", error);
+      Alert.alert(
+        "Google Sign-In failed",
+        error?.message || "Please try again"
+      );
+    } finally {
+      hideLoader();
     }
-
-    // Only navigate on success
-    navigate("/home"); 
-  } catch (error: any) {
-    console.log("Google Login Error:", error);
-    Alert.alert("Google Sign-In failed", error?.message || "Please try again");
-  } finally {
-    hideLoader();
-  }
   };
 
   return (
@@ -138,12 +138,22 @@ const Login = () => {
 
           {/* Action Buttons */}
           <View className="mt-10 space-y-4">
-            <TouchableOpacity onPress={handleLogin} activeOpacity={0.8}>
-              <Text className="text-white text-center font-bold text-lg">
-                Login
-              </Text>
-            </TouchableOpacity>
-
+            <LinearGradient
+              colors={["#22d3ee", "#2563eb"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={{ borderRadius: 16 }}
+            >
+              <TouchableOpacity
+                onPress={handleLogin}
+                activeOpacity={0.8}
+                style={{ paddingVertical: 12 }}
+              >
+                <Text className="text-white text-center font-bold text-lg">
+                  Login
+                </Text>
+              </TouchableOpacity>
+            </LinearGradient>
 
             <View className="flex-row justify-center items-center mt-6">
               <Text className="text-zinc-500">Don't have an account? </Text>
