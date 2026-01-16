@@ -8,14 +8,12 @@ import Animated, {
   withSpring,
   withSequence,
   interpolate,
+  Extrapolation,
 } from "react-native-reanimated";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-// Strict types for MaterialIcons used
 type MaterialIconName = "home" | "search" | "add-circle" | "movie" | "person";
-
-// Strict tab names
 type TabName = "home" | "search" | "create" | "reels" | "profile";
 
 interface TabBarIconProps {
@@ -26,84 +24,104 @@ interface TabBarIconProps {
   size: number;
 }
 
-const TabBarIcon = ({ name, icon, focused, color, size }: TabBarIconProps) => {
+function TabBarIcon({ name, icon, focused, color, size }: TabBarIconProps) {
   const scale = useSharedValue(1);
   const rotation = useSharedValue(0);
 
   useEffect(() => {
     if (focused) {
       scale.value = withSequence(
-        withSpring(1.2, { damping: 8, stiffness: 200 }),
-        withSpring(1, { damping: 8, stiffness: 200 })
+        withSpring(1.1, { damping: 15, stiffness: 180 }),
+        withSpring(1, { damping: 12, stiffness: 150 })
       );
 
       if (name === "create") {
         rotation.value = withSequence(
-          withSpring(180, { damping: 10 }),
-          withSpring(0, { damping: 10 })
+          withSpring(-8, { damping: 14 }),
+          withSpring(8, { damping: 14 }),
+          withSpring(0, { damping: 12 })
         );
       }
+    } else {
+      scale.value = withSpring(1, { damping: 16 });
+      rotation.value = withSpring(0);
     }
-  }, [focused]);
+  }, [focused, name]);
 
-  const animatedStyle = useAnimatedStyle(() => ({
+  const iconStyle = useAnimatedStyle(() => ({
     transform: [
       { scale: scale.value },
-      { rotate: `${rotation.value}deg` }
+      { rotate: `${rotation.value}deg` },
     ],
   }));
 
-  const glowStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(scale.value, [1, 1.2], [0, 0.6]),
-    transform: [{ scale: scale.value * 1.5 }],
-  }));
+  const isCreate = name === "create";
 
   return (
-    <View className="items-center justify-center relative">
-      {/* Glow behind icon */}
-      {focused && (
-        <Animated.View
-          style={[glowStyle]}
-          className="absolute w-12 h-12 rounded-full bg-blue-500 blur-xl"
-        />
-      )}
-
-      <Animated.View style={animatedStyle}>
+    <View 
+      style={{
+        alignItems: "center",
+        justifyContent: isCreate ? "flex-start" : "center",
+        position: "relative",
+        flex: 1,
+        height: "100%",
+      }}
+    >
+      {/* Icon container */}
+      <Animated.View style={[iconStyle, { marginTop: isCreate ? -28 : 0 }]}>
         <View
-          className={`items-center justify-center ${
-            name === "create"
-              ? "bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl p-2"
-              : ""
-          }`}
-          style={
-            name === "create" && focused
+          style={{
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 999,
+            ...(isCreate
               ? {
-                  shadowColor: "#3b82f6", // blue shadow
+                  width: 64,
+                  height: 64,
+                  backgroundColor: "#06b6d4",
+                  shadowColor: "#06b6d4",
                   shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.5,
+                  shadowOpacity: 0.3,
                   shadowRadius: 8,
                   elevation: 8,
                 }
-              : {}
-          }
+              : {}),
+          }}
         >
           <MaterialIcons
             name={icon}
-            size={name === "create" ? size + 4 : focused ? size + 2 : size}
-            color={name === "create" ? "#fff" : color}
+            size={isCreate ? 36 : focused ? 28 : 24}
+            color={
+              isCreate
+                ? "#ffffff"
+                : focused
+                ? "#22d3ee"
+                : color
+            }
+            style={{ opacity: 1 }}
           />
         </View>
       </Animated.View>
 
-      {/* Active tab indicator for non-create tabs */}
-      {focused && name !== "create" && (
-        <View className="absolute -bottom-2 w-1 h-1 bg-blue-500 rounded-full" />
+      {/* Simple indicator dot for non-create tabs */}
+      {focused && !isCreate && (
+        <View
+          style={{
+            position: "absolute",
+            bottom: -6,
+            width: 4,
+            height: 4,
+            backgroundColor: "#22d3ee",
+            borderRadius: 999,
+            marginTop: 4,
+          }}
+        />
       )}
     </View>
   );
-};
+}
 
-const DashboardLayout = () => {
+export default function DashboardLayout() {
   const tabs: { name: TabName; icon: MaterialIconName }[] = [
     { name: "home", icon: "home" },
     { name: "search", icon: "search" },
@@ -117,21 +135,30 @@ const DashboardLayout = () => {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
+        tabBarHideOnKeyboard: true,
         tabBarStyle: {
-          backgroundColor: "#0a0a0a",
+          backgroundColor: "#0a0e14",
           borderTopWidth: 1,
-          borderTopColor: "#1a1a1a",
-          height: Platform.OS === "ios" ? 85 : 65,
-          paddingBottom: Platform.OS === "ios" ? 20 : 8,
+          borderTopColor: "rgba(34, 211, 238, 0.08)",
+          height: Platform.select({ ios: 88, android: 70, web: 75 }),
+          paddingBottom: Platform.select({ ios: 24, android: 12, web: 12 }),
           paddingTop: 8,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.25,
-          shadowRadius: 3.84,
-          elevation: 5,
+          paddingHorizontal: 8,
+          ...Platform.select({
+            web: {
+              boxShadow: "0 -4px 16px rgba(0, 0, 0, 0.3)",
+            },
+            default: {
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: -4 },
+              shadowOpacity: 0.2,
+              shadowRadius: 8,
+              elevation: 12,
+            },
+          }),
         },
-        tabBarActiveTintColor: "#3b82f6", // bright blue
-        tabBarInactiveTintColor: "#6b7280", // gray
+        tabBarActiveTintColor: "#22d3ee",
+        tabBarInactiveTintColor: "#64748b",
       }}
     >
       {tabs.map(({ name, icon }) => (
@@ -153,6 +180,4 @@ const DashboardLayout = () => {
       ))}
     </Tabs>
   );
-};
-
-export default DashboardLayout;
+}
