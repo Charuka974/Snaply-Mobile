@@ -11,6 +11,11 @@ const ProfileIndex = () => {
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]>("Posts");
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
+  const [imageError, setImageError] = useState(false);
+  const genderLabelMap = {
+    male: "Male",
+    female: "Female",
+  } as const;
 
   useEffect(() => {
     // Subscribe to user data updates
@@ -27,17 +32,29 @@ const ProfileIndex = () => {
 
     switch (activeTab) {
       case "Posts":
-        data = Array.from({ length: 21 }, (_, i) => ({ id: i, color: "#374151" }));
+        data = Array.from({ length: 21 }, (_, i) => ({
+          id: i,
+          color: "#374151",
+        }));
         break;
       case "Reels":
-        data = Array.from({ length: 12 }, (_, i) => ({ id: i, color: "#4B5563" }));
+        data = Array.from({ length: 12 }, (_, i) => ({
+          id: i,
+          color: "#4B5563",
+        }));
         itemStyle = "w-1/2 aspect-video";
         break;
       case "Photos":
-        data = Array.from({ length: 12 }, (_, i) => ({ id: i, color: "#4B5563" }));
+        data = Array.from({ length: 12 }, (_, i) => ({
+          id: i,
+          color: "#4B5563",
+        }));
         break;
       case "Tagged":
-        data = Array.from({ length: 6 }, (_, i) => ({ id: i, color: "#6B7280" }));
+        data = Array.from({ length: 6 }, (_, i) => ({
+          id: i,
+          color: "#6B7280",
+        }));
         break;
     }
 
@@ -67,21 +84,33 @@ const ProfileIndex = () => {
         </View>
 
         <View className="flex-row items-center px-4">
-          <Image
-            source={{ uri: user.profilePicture }}
-            className="w-24 h-24 rounded-full"
-          />
+          <View className="w-24 h-24 rounded-full bg-zinc-800 items-center justify-center">
+            {!user.profilePicture || imageError ? (
+              <MaterialIcons name="person" size={48} color="#9CA3AF" />
+            ) : (
+              <Image
+                source={{ uri: user.profilePicture }}
+                className="w-24 h-24 rounded-full"
+                onError={() => setImageError(true)}
+              />
+            )}
+          </View>
+
           <View className="flex-row flex-1 justify-around ml-4">
             <View className="items-center">
               <Text className="text-white font-semibold text-lg">21</Text>
               <Text className="text-zinc-400 text-sm">Posts</Text>
             </View>
             <View className="items-center">
-              <Text className="text-white font-semibold text-lg">{user.followers?.length || 0}</Text>
+              <Text className="text-white font-semibold text-lg">
+                {user.followers?.length || 0}
+              </Text>
               <Text className="text-zinc-400 text-sm">Followers</Text>
             </View>
             <View className="items-center">
-              <Text className="text-white font-semibold text-lg">{user.following?.length || 0}</Text>
+              <Text className="text-white font-semibold text-lg">
+                {user.following?.length || 0}
+              </Text>
               <Text className="text-zinc-400 text-sm">Following</Text>
             </View>
           </View>
@@ -91,6 +120,13 @@ const ProfileIndex = () => {
           <Text className="text-white font-semibold pb-2">{user.name}</Text>
           <Text className="text-zinc-400">{user.bio}</Text>
         </View>
+        {(user.gender === "male" || user.gender === "female") && (
+          <View className="px-3 py-1 mt-2 self-start bg-blue-500 rounded-full ml-4">
+            <Text className="text-white text-sm font-semibold">
+              {genderLabelMap[user.gender]}
+            </Text>
+          </View>
+        )}
 
         <TouchableOpacity
           className="mx-4 mt-4 py-2 rounded-lg bg-zinc-900 items-center"
@@ -106,7 +142,11 @@ const ProfileIndex = () => {
               onPress={() => setActiveTab(tab)}
               className={`flex-1 items-center py-3 ${activeTab === tab ? "border-t-2 border-white" : ""}`}
             >
-              <Text className={`${activeTab === tab ? "text-white" : "text-zinc-500"}`}>{tab}</Text>
+              <Text
+                className={`${activeTab === tab ? "text-white" : "text-zinc-500"}`}
+              >
+                {tab}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>

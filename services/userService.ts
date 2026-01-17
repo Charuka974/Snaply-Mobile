@@ -15,12 +15,19 @@ export type User = {
   name: string;
   email: string;
   bio: string;
+  gender: Gender;
   role: "user" | "admin";
   createdAt: Date;
   profilePicture?: string;
   followers?: string[];
   following?: string[];
 };
+
+export type Gender =
+  | "male"
+  | "female"
+  | "prefer_not_to_say";
+
 
 const usersCollection = collection(db, "users");
 
@@ -29,6 +36,7 @@ export const createUser = async (
   email: string,
   bio = "Just another Snaply user sharing moments.",
   role: "user" | "admin" = "user",
+  gender: Gender = "prefer_not_to_say",
   profilePicture = ""
 ): Promise<User> => {
   const currentUser = auth.currentUser;
@@ -40,6 +48,7 @@ export const createUser = async (
     email,
     bio,
     role,
+    gender,
     profilePicture,
     createdAt: serverTimestamp(),
     followers: [],
@@ -52,6 +61,7 @@ export const createUser = async (
     email,
     bio,
     role,
+    gender,
     createdAt: new Date(),
     profilePicture,
     followers: [],
@@ -73,6 +83,7 @@ export const loadMyData = async (): Promise<User | null> => {
     email: d.email,
     bio: d.bio,
     role: d.role,
+    gender: d.gender ?? "prefer_not_to_say",
     createdAt: d.createdAt?.toDate?.() ?? new Date(),
     profilePicture: d.profilePicture,
     followers: d.followers ?? [],
@@ -83,11 +94,13 @@ export const loadMyData = async (): Promise<User | null> => {
 export const updateMyProfile = async ({
   name,
   bio,
+  gender,
   avatarFile,
   currentProfilePicture, // pass the current profile picture URL
 }: {
   name: string;
   bio: string;
+  gender?: Gender;
   avatarFile?: string | File;
   currentProfilePicture?: string;
 }) => {
@@ -111,6 +124,7 @@ export const updateMyProfile = async ({
   await updateDoc(doc(db, "users", currentUser.uid), {
     name,
     bio,
+    gender,
     ...(profilePicture && { profilePicture }),
   });
 };
@@ -129,6 +143,7 @@ export const subscribeToMyData = (cb: (u: User | null) => void) => {
       email: d.email,
       bio: d.bio,
       role: d.role,
+      gender: d.gender ?? "prefer_not_to_say",
       createdAt: d.createdAt?.toDate?.() ?? new Date(),
       profilePicture: d.profilePicture,
       followers: d.followers ?? [],
