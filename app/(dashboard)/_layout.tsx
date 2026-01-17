@@ -13,8 +13,8 @@ import Animated, {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-type MaterialIconName = "home" | "search" | "add-circle" | "movie" | "person";
-type TabName = "home" | "search" | "create" | "reels" | "profile";
+type MaterialIconName = "home" | "search" | "add-circle" | "movie" | "person" ;
+type TabName = "home" | "search" | "create" | "reels" | "profile" ;
 
 interface TabBarIconProps {
   name: TabName;

@@ -30,19 +30,19 @@ const Home = () => {
   return (
     <View className="flex-1 bg-black">
       {/* Top Bar */}
-      <View className="flex-row justify-between items-center px-4 pt-8 pb-3 border-b border-zinc-800">
-        <View className="flex-row items-center space-x-2">
+      <View className="flex-row justify-between items-center px-4 pt-8 pb-3 border-b border-cyan-500/20">
+        <View className="flex-row items-center">
           <Image
             source={SnaplyLogo}
             style={{ width: 32, height: 32 }}
             resizeMode="contain"
           />
-          <Text className="text-white text-2xl font-bold">Snaply</Text>
+          <Text className="text-cyan-400 text-2xl font-bold ml-2">Snaply</Text>
         </View>
 
-        <View className="flex-row space-x-4">
-          <Feather name="heart" size={24} color="white" />
-          <Feather name="send" size={24} color="white" />
+        <View className="flex-row">
+          <Feather name="heart" size={24} color="#22d3ee" className="mr-4" />
+          <Feather name="send" size={24} color="#22d3ee" />
         </View>
       </View>
 
@@ -55,10 +55,8 @@ const Home = () => {
         >
           {stories.map((story) => (
             <View key={story.id} className="items-center mr-4">
-              <View className="w-16 h-16 rounded-full bg-zinc-800 border-2 border-cyan-500" />
-              <Text className="text-white text-xs mt-1">
-                {story.name}
-              </Text>
+              <View className="w-16 h-16 rounded-full border-2 border-cyan-400 bg-zinc-800" />
+              <Text className="text-white text-xs mt-1">{story.name}</Text>
             </View>
           ))}
         </ScrollView>
@@ -69,34 +67,48 @@ const Home = () => {
             {/* Post Header */}
             <View className="flex-row items-center justify-between px-4 mb-2">
               <View className="flex-row items-center">
-                <View className="w-10 h-10 rounded-full bg-zinc-700 mr-3" />
-                <Text className="text-white font-semibold">
-                  {post.user}
-                </Text>
+                {/* Profile image as perfect circle */}
+                <View
+                  style={{ width: 40, height: 40, borderRadius: 20 }}
+                  className="bg-cyan-900 mr-3"
+                />
+                <Text className="text-white font-semibold">{post.user}</Text>
               </View>
-              <Feather name="more-vertical" size={20} color="white" />
+              <Feather name="more-vertical" size={20} color="#22d3ee" />
             </View>
 
             {/* Post Image */}
-            <View className="w-full h-80 bg-zinc-800" />
+            <View className="w-full h-80 bg-cyan-900/20" />
 
             {/* Actions */}
             <View className="flex-row justify-between px-4 py-3">
-              <View className="flex-row space-x-4">
-                <Feather name="heart" size={24} color="white" />
-                <Feather name="message-circle" size={24} color="white" />
-                <Feather name="send" size={24} color="white" />
+              <View className="flex-row">
+                <Feather
+                  name="heart"
+                  size={24}
+                  color="#22d3ee"
+                  className="mr-4"
+                />
+                <Feather
+                  name="message-circle"
+                  size={24}
+                  color="#22d3ee"
+                  className="mr-4"
+                />
+                <Feather name="send" size={24} color="#22d3ee" />
               </View>
-              <Feather name="bookmark" size={24} color="white" />
+              <Feather name="bookmark" size={24} color="#22d3ee" />
             </View>
 
             {/* Likes & Caption */}
             <View className="px-4">
-              <Text className="text-white font-semibold mb-1">
+              <Text className="text-cyan-400 font-semibold mb-1">
                 {post.likes} likes
               </Text>
               <Text className="text-white">
-                <Text className="font-semibold">{post.user} </Text>
+                <Text className="font-semibold text-cyan-400">
+                  {post.user}{" "}
+                </Text>
                 {post.caption}
               </Text>
             </View>
