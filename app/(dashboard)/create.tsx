@@ -30,6 +30,7 @@ const Create = () => {
   const [caption, setCaption] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const { showLoader, hideLoader } = useLoader();
+  const [tagInput, setTagInput] = useState("");
 
   const pickMedia = async (type: "image" | "video") => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -270,10 +271,18 @@ const Create = () => {
             ))}
           </View>
           <TextInput
+            value={tagInput}
+            onChangeText={setTagInput}
             placeholder="Add tags..."
             placeholderTextColor="#9CA3AF"
             className="bg-zinc-900 p-3 rounded-xl text-white"
-            onSubmitEditing={(e) => addTag(e.nativeEvent.text.trim())}
+            onSubmitEditing={() => {
+              if (!tagInput.trim()) return;
+
+              addTag(tagInput.trim());
+              setTagInput(""); // clear input after enter
+            }}
+            returnKeyType="done"
           />
         </View>
       </ScrollView>

@@ -6,6 +6,7 @@ import {
   serverTimestamp,
   onSnapshot,
   getDoc,
+  getDocs,
 } from "firebase/firestore";
 import { auth, db } from "./firebase";
 import { uploadUserAvatar } from "./uploadService";
@@ -16,6 +17,19 @@ export type User = {
   email: string;
   bio: string;
   gender: Gender;
+  role: "user" | "admin";
+  createdAt: Date;
+  profilePicture?: string;
+  followers?: string[];
+  following?: string[];
+};
+
+export type FeedUser = {
+  id: string;
+  name: string;
+  email: string;
+  bio: string;
+  gender: "male" | "female" | "prefer_not_to_say";
   role: "user" | "admin";
   createdAt: Date;
   profilePicture?: string;
@@ -150,4 +164,28 @@ export const subscribeToMyData = (cb: (u: User | null) => void) => {
       following: d.following ?? [],
     });
   });
+};
+
+
+export const loadFeedUsers = async (): Promise<User[]> => {
+  const usersCol = collection(db, "users");
+  const snapshot = await getDocs(usersCol);
+
+  const users: User[] = snapshot.docs.map((docSnap) => {
+    const d = docSnap.data();
+    return {
+      id: docSnap.id,
+      name: d.name,
+      email: d.email,
+      bio: d.bio,
+      role: d.role,
+      gender: d.gender ?? "prefer_not_to_say",
+      createdAt: d.createdAt?.toDate?.() ?? new Date(),
+      profilePicture: d.profilePicture,
+      followers: d.followers ?? [],
+      following: d.following ?? [],
+    };
+  });
+
+  return users;
 };
