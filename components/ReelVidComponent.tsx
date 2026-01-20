@@ -1,72 +1,137 @@
-import { View, Text, TouchableOpacity, Image, useWindowDimensions } from "react-native";
-import React, { useEffect, useRef } from "react";
-import { Feather, AntDesign } from "@expo/vector-icons";
-import { VideoView, useVideoPlayer } from "expo-video";
-import { ReelPost } from "@/services/postService";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  useWindowDimensions,
+} from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
+import { VideoPlayer, VideoView, useVideoPlayer } from "expo-video";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
+import { ReelPost } from "@/services/ReelsService";
+import { subscribeToComments } from "@/services/CommentService";
+import {
+  isPostLikedByUser,
+  likePost,
+  subscribeToLikes,
+  unlikePost,
+} from "@/services/LikeService";
 
-export const ReelItem = ({ item, isActive }: { item: ReelPost; isActive: boolean }) => {
+export const ReelItem = ({
+  item,
+  isActive,
+}: {
+  item: ReelPost;
+  isActive: boolean;
+}) => {
   const { height: screenHeight, width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const videoHeight = screenHeight - insets.top - insets.bottom;
-
-  const player = useVideoPlayer(item.video.uri);
-  const isReleased = useRef(false);
   const router = useRouter();
 
-  // Video settings
-  player.loop = true;
-  player.muted = false;
+  // Each ReelItem creates & owns its own player
+  const player = useVideoPlayer(item.video.uri, (p) => {
+    p.loop = true;
+    p.muted = false; // or true if you want mute by default
+    // p.play();              // ← do NOT auto-play here – control from below
+  });
 
-  // Play/pause based on isActive and navigation focus
+  // const isReleased = useRef(false);
+
   useFocusEffect(
     React.useCallback(() => {
-      if (isReleased.current) return;
-
-      if (isActive) player.play();
-      else player.pause();
-
+      if (isActive) {
+        player.play();
+      } else {
+        player.pause();
+      }
       return () => {
         player.pause();
       };
-    }, [isActive])
+    }, [isActive, player]),
   );
 
-  // React to scrolling visibility changes
+  // Optional: extra safety (but useFocusEffect usually enough)
   useEffect(() => {
-    if (isReleased.current) return;
+    // if (isReleased.current) return;
+    if (isActive) {
+      player.play();
+    } else {
+      player.pause();
+    }
+  }, [isActive, player]);
 
-    if (isActive) player.play();
-    else player.pause();
-  }, [isActive]);
-
-  // Cleanup on unmount
+  // Load comments count
+  const [commentCount, setCommentCount] = useState(0);
+  // Subscribe to comments for this reel
   useEffect(() => {
-    return () => {
-      isReleased.current = true;
-      player.release?.();
-    };
-  }, []);
+    const unsubscribe = subscribeToComments(item.id, (comments) => {
+      setCommentCount(comments.length);
+    });
+    return () => unsubscribe();
+  }, [item.id]);
+
+  // Likes
+  /* ---------------- Likes ---------------- */
+  const [likeCount, setLikeCount] = useState(0);
+  const [liked, setLiked] = useState(false);
+  const heartIcon = liked ? "heart" : "hearto";
+
+  // Initial liked state
+  useEffect(() => {
+    isPostLikedByUser(item.id).then(setLiked);
+  }, [item.id]);
+  // Real-time like count
+  useEffect(() => {
+    const unsubscribe = subscribeToLikes(item.id, (likes) => {
+      setLikeCount(likes.length);
+    });
+    return unsubscribe;
+  }, [item.id]);
+  const toggleLike = async () => {
+    try {
+      if (liked) {
+        await unlikePost(item.id);
+        setLiked(false);
+      } else {
+        await likePost(item.id);
+        setLiked(true);
+      }
+    } catch (err) {
+      console.error("Like error:", err);
+    }
+  };
 
   return (
     <View style={{ height: videoHeight, width }} className="bg-black">
-      <VideoView player={player} style={{ height: videoHeight, width }} contentFit="contain" />
+      <VideoView
+        player={player}
+        style={{ height: videoHeight, width }}
+        contentFit="contain"
+      />
 
       {/* Right Actions */}
       <View className="absolute right-4 bottom-24 items-center gap-4">
-        <TouchableOpacity className="items-center">
-          <AntDesign name="heart" size={28} color="white" />
-          <Text className="text-white text-xs mt-1">Like</Text>
+        <TouchableOpacity onPress={toggleLike} className="items-center">
+          <MaterialIcons
+            name={liked ? "favorite" : "favorite-border"}
+            size={30}
+            color={liked ? "#ef4444" : "white"}
+          />
+          <Text className="text-white text-xs mt-1">{likeCount}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          onPress={() => router.push("/reels/comments")}
-          className="items-center">
+        <TouchableOpacity
+          onPress={() => router.push(`/reels/comments?postId=${item.id}`)}
+          className="items-center"
+        >
           <Feather name="message-circle" size={26} color="white" />
-          <Text className="text-white text-xs mt-1">Comment</Text>
+          <Text className="text-white text-xs mt-1">
+            {commentCount} {commentCount === 1 ? "Comment" : "Comments"}
+          </Text>
         </TouchableOpacity>
-
         <TouchableOpacity className="items-center">
           <Feather name="send" size={26} color="white" />
           <Text className="text-white text-xs mt-1">Share</Text>

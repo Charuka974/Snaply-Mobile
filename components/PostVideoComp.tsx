@@ -1,8 +1,4 @@
-import {
-  View,
-  TouchableOpacity,
-  Dimensions,
-} from "react-native";
+import { View, TouchableOpacity, Dimensions } from "react-native";
 import React, { useEffect, useState, useRef } from "react";
 import { Feather } from "@expo/vector-icons";
 import { VideoView, useVideoPlayer } from "expo-video";
@@ -18,8 +14,10 @@ export type PostVideoProps = {
 
 export const PostVideo: React.FC<PostVideoProps> = ({ uri, isActive }) => {
   const [muted, setMuted] = useState(false);
-
   const player = useVideoPlayer(uri);
+
+  // Track if player has been released
+  const isReleased = useRef(false);
 
   // Configure player ONCE
   useEffect(() => {
@@ -27,33 +25,48 @@ export const PostVideo: React.FC<PostVideoProps> = ({ uri, isActive }) => {
     player.muted = muted;
 
     return () => {
-      player.pause();
-      player.release?.(); // clean up
+      try {
+        if (!isReleased.current) {
+          player.pause();
+          player.release?.();
+          isReleased.current = true; // mark as released
+        }
+      } catch (e) {
+        console.log("Video already released, skipping cleanup", e);
+      }
     };
   }, []);
 
   // Update mute dynamically
   useEffect(() => {
-    player.muted = muted;
+    try {
+      if (!isReleased.current) player.muted = muted;
+    } catch {}
   }, [muted]);
 
   // Play / Pause based on visibility
   useEffect(() => {
-    if (isActive) player.play();
-    else player.pause();
+    try {
+      if (!isReleased.current) {
+        if (isActive) player.play();
+        else player.pause();
+      }
+    } catch {}
   }, [isActive]);
 
   // Pause when leaving Home screen
   useFocusEffect(
     React.useCallback(() => {
-      if (isActive) {
-        player.play();
-      }
+      try {
+        if (!isReleased.current && isActive) player.play();
+      } catch {}
 
       return () => {
-        player.pause(); // stops background playback
+        try {
+          if (!isReleased.current) player.pause();
+        } catch {}
       };
-    }, [isActive])
+    }, [isActive]),
   );
 
   const toggleMute = () => setMuted((m) => !m);

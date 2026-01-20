@@ -5,27 +5,41 @@ import {
   TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
+  Image,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useState } from "react";
-import { useRouter } from "expo-router";
-
-const mockComments = [
-  { id: "1", user: "alex_dev", text: "This is fire 🔥", time: "2h" },
-  { id: "2", user: "liya.design", text: "Clean vibes ✨", time: "5h" },
-  {
-    id: "3",
-    user: "john.mp4",
-    text: "Late night coding hits different",
-    time: "12h",
-  },
-];
+import { useState, useEffect } from "react";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { CommentWithUser, addComment, subscribeToComments } from "@/services/CommentService";
 
 const INPUT_HEIGHT = 48;
 
 export default function CommentsScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const postId = params.postId as string;
+
   const [comment, setComment] = useState("");
+  const [comments, setComments] = useState<CommentWithUser[]>([]);
+
+  // Subscribe to comments in real-time
+  useEffect(() => {
+    if (!postId) return;
+
+    const unsubscribe = subscribeToComments(postId, setComments);
+    return () => unsubscribe();
+  }, [postId]);
+
+  const handleAddComment = async () => {
+    if (!comment.trim() || !postId) return;
+
+    try {
+      await addComment(postId, comment.trim());
+      setComment(""); // clear input after posting
+    } catch (err) {
+      console.error("Failed to add comment:", err);
+    }
+  };
 
   return (
     <KeyboardAvoidingView className="flex-1 bg-[#0a0e14]" behavior="padding">
@@ -42,20 +56,34 @@ export default function CommentsScreen() {
 
       {/* Comments list */}
       <FlatList
-        data={mockComments}
+        data={comments}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16 }}
         renderItem={({ item }) => (
-          <View className="mb-5 p-3.5 rounded-xl border-l-4 border-cyan-500 bg-slate-900/30">
-            <View className="flex-row items-center justify-between mb-1.5">
-              <Text className="text-cyan-500 font-semibold text-sm">
-                @{item.user}
+          <View className="mb-5 p-3.5 rounded-xl border-l-4 border-cyan-500 bg-slate-900/30 flex-row gap-3">
+            {/* Avatar */}
+            {item.avatar ? (
+              <Image
+                source={{ uri: item.avatar }}
+                style={{ width: 36, height: 36, borderRadius: 18 }}
+              />
+            ) : (
+              <View className="w-9 h-9 rounded-full bg-zinc-700" style={{ width: 36, height: 36, borderRadius: 18 }} />
+            )}
+
+            <View className="flex-1">
+              <View className="flex-row items-center justify-between mb-1">
+                <Text className="text-cyan-500 font-semibold text-sm">
+                  @{item.username}
+                </Text>
+                <Text className="text-zinc-400 text-xs">
+                  {item.createdAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                </Text>
+              </View>
+              <Text className="text-slate-200 text-[15px] leading-5">
+                {item.text}
               </Text>
-              <Text className="text-zinc-400 text-xs">{item.time}</Text>
             </View>
-            <Text className="text-slate-200 text-[15px] leading-5">
-              {item.text}
-            </Text>
           </View>
         )}
       />
@@ -89,10 +117,9 @@ export default function CommentsScreen() {
           className={`ml-3 px-5 rounded-full items-center justify-center mb-5 ${
             comment.trim() ? "bg-cyan-400" : "bg-zinc-500/20"
           }`}
+          onPress={handleAddComment}
         >
-          <Text
-            className={`font-semibold text-[15px] ${comment.trim() ? "text-[#0a0e14]" : "text-zinc-400"}`}
-          >
+          <Text className={`font-semibold text-[15px] ${comment.trim() ? "text-[#0a0e14]" : "text-zinc-400"}`}>
             Post
           </Text>
         </TouchableOpacity>

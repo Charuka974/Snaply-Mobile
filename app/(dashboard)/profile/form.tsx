@@ -12,14 +12,9 @@ import {
 import React, { useEffect, useState, useMemo } from "react";
 import * as ImagePicker from "expo-image-picker";
 import Toast from "react-native-toast-message";
-import {
-  Gender,
-  subscribeToMyData,
-  updateMyProfile,
-  User,
-} from "../../../services/userService";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { Gender, subscribeToMyData, updateMyProfile, User } from "@/services/userService";
 
 const Form = () => {
   const [user, setUser] = useState<User | null>(null);
