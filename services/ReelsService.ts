@@ -14,6 +14,7 @@ export type ReelPost = {
   user: User;
   video: PostMedia;
   caption: string;
+  tags: string[];
   createdAt: Date;
 };
 
@@ -49,6 +50,7 @@ export const loadReels = async (): Promise<ReelPost[]> => {
       id: docSnap.id,
       video,
       caption: data.caption || "",
+      tags: data.tags || [],
       createdAt: data.createdAt?.toDate?.() ?? new Date(),
       user: {
         id: data.userId,

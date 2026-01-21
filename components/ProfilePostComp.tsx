@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -11,228 +11,142 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { Post } from "@/services/postService";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { useFocusEffect } from "expo-router";
+import { PostActions } from "@/components/PostActionsComp";
+
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const VIDEO_HEIGHT = 360;
 
 interface ProfilePostProps {
   post: Post;
   userName?: string;
   userProfilePicture?: string;
-  showVideos?: boolean;
-  screenWidth?: number;
-  videoHeight?: number;
 }
-
-const SCREEN_WIDTH = Dimensions.get("window").width;
-const VIDEO_HEIGHT = 360;
 
 export const ProfilePost: React.FC<ProfilePostProps> = ({
   post,
   userName,
   userProfilePicture,
-  showVideos = true,
-  screenWidth = SCREEN_WIDTH,
-  videoHeight = VIDEO_HEIGHT,
 }) => {
+  const [openVideoUri, setOpenVideoUri] = useState<string | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
   if (!post) return null;
 
-  const [openVideoUri, setOpenVideoUri] = useState<string | null>(null);
-
-  const PostVideoItem: React.FC<{ uri: string; isActive: boolean }> = ({
-    uri,
-    isActive,
-  }) => {
-    const [muted, setMuted] = useState(false);
-    const player = useVideoPlayer(uri);
-    const isMounted = useRef(true);
-
-    useEffect(() => {
-      isMounted.current = true;
-      player.loop = true;
-      player.muted = muted;
-
-      return () => {
-        isMounted.current = false;
-        try {
-          player.pause();
-          player.release?.();
-        } catch (e) {
-          console.log("Video already released, skipping cleanup", e);
-        }
-      };
-    }, []);
-
-    useEffect(() => {
-      if (!isMounted.current) return;
-      try {
-        player.muted = muted;
-      } catch {}
-    }, [muted]);
-
-    useEffect(() => {
-      if (!isMounted.current) return;
-      try {
-        if (isActive) player.play();
-        else player.pause();
-      } catch {}
-    }, [isActive]);
-
-    useFocusEffect(
-      React.useCallback(() => {
-        if (!isMounted.current) return;
-        try {
-          if (isActive) player.play();
-        } catch {}
-        return () => {
-          try {
-            player.pause();
-          } catch {}
-        };
-      }, [isActive]),
-    );
-
-    const toggleMute = () => setMuted((m) => !m);
-
-    return (
-      <View style={{ width: screenWidth, height: videoHeight }}>
-        <VideoView
-          player={player}
-          style={{ width: screenWidth, height: videoHeight }}
-          contentFit="contain"
-        />
-        <TouchableOpacity
-          style={{
-            position: "absolute",
-            top: 10,
-            left: 10,
-            backgroundColor: "rgba(0,0,0,0.4)",
-            padding: 6,
-            borderRadius: 20,
-          }}
-          onPress={toggleMute}
-        >
-          <Feather
-            name={muted ? "volume-x" : "volume-2"}
-            size={20}
-            color="white"
-          />
-        </TouchableOpacity>
-      </View>
-    );
-  };
-
   return (
-    <View style={{ marginBottom: 32 }}>
-      {/* User Header */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          paddingHorizontal: 16,
-          marginBottom: 8,
-        }}
-      >
+    <View className="pb-8 pt-2 border-b border-t border-zinc-800">
+      {/* ---------- User Header ---------- */}
+      <View className="flex-row items-center px-4 mb-2">
         {userProfilePicture ? (
           <Image
             source={{ uri: userProfilePicture }}
-            style={{ width: 40, height: 40, borderRadius: 20 }}
+            className="w-10 h-10 rounded-full bg-zinc-700 mr-3"
           />
         ) : (
-          <View
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 20,
-              backgroundColor: "#555",
-            }}
-          />
+          <View className="w-10 h-10 rounded-full bg-zinc-700 mr-3" />
         )}
-        <Text style={{ color: "white", fontWeight: "600", marginLeft: 8 }}>
-          {userName || "Unknown"}
+        <Text className="text-cyan-400 font-semibold">
+          {userName ?? "Unknown"}
         </Text>
       </View>
 
-      {/* Media Carousel */}
-      <ScrollView
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-      >
-        {post.media.map((m, index) => {
-          if (m.type === "image") {
-            return (
-              <Image
-                key={index}
-                source={{ uri: m.uri }}
-                style={{ width: screenWidth, height: videoHeight }}
-                resizeMode="cover"
-              />
-            );
-          }
-          if (m.type === "video" && showVideos) {
-            // Feed: show thumbnail (first frame) using paused VideoView
-            return (
-              <TouchableOpacity
-                key={index}
-                onPress={() => setOpenVideoUri(m.uri)}
-                style={{ width: screenWidth, height: videoHeight }}
-              >
-                {/* Create player for thumbnail */}
-                {(() => {
-                  const thumbPlayer = useVideoPlayer(m.uri);
-                  useEffect(() => {
-                    try {
-                      thumbPlayer.pause(); // immediately pause to show first frame
-                    } catch {}
-                  }, []);
-                  return (
-                    <VideoView
-                      player={thumbPlayer}
-                      style={{ width: screenWidth, height: videoHeight }}
-                      contentFit="contain"
-                    />
-                  );
-                })()}
-
-                <View
-                  style={{
-                    position: "absolute",
-                    width: "100%",
-                    height: "100%",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <Feather name="play-circle" size={64} color="white" />
-                </View>
-              </TouchableOpacity>
-            );
-          }
-          return null;
-        })}
-      </ScrollView>
-
-      {/* Caption */}
+      {/* ---------- Caption ---------- */}
       {post.caption && (
-        <View style={{ paddingHorizontal: 16, marginTop: 8 }}>
-          <Text style={{ color: "white" }}>
-            <Text style={{ fontWeight: "600", color: "#22d3ee" }}>
-              {userName || "Unknown"}{" "}
-            </Text>
+        <View className="px-4 mt-3">
+          <Text className="text-white leading-5">
             {post.caption}
           </Text>
         </View>
       )}
 
-      {/* Full-screen Video Modal */}
+      {/* ---------- Tags ---------- */}
+      {post.tags?.length > 0 && (
+        <View className="px-4 mt-2 flex-row flex-wrap">
+          {post.tags.map((tag) => (
+            <Text key={tag} className="text-cyan-400 text-sm mr-3 mb-1">
+              #{tag}
+            </Text>
+          ))}
+        </View>
+      )}
+
+      {/* ---------- Media ---------- */}
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={(e) => {
+          const index = Math.round(
+            e.nativeEvent.contentOffset.x / SCREEN_WIDTH,
+          );
+          setActiveIndex(index);
+        }}
+        scrollEventThrottle={16}
+      >
+        {post.media.map((m, index) =>
+          m.type === "image" ? (
+            <Image
+              key={index}
+              source={{ uri: m.uri }}
+              style={{ width: SCREEN_WIDTH, height: VIDEO_HEIGHT }}
+              resizeMode="cover"
+            />
+          ) : (
+            <TouchableOpacity
+              key={index}
+              onPress={() => setOpenVideoUri(m.uri)}
+              activeOpacity={0.9}
+              style={{ width: SCREEN_WIDTH, height: VIDEO_HEIGHT }}
+            >
+              {/* Video Thumbnail using first frame */}
+              {(() => {
+                const player = useVideoPlayer(m.uri);
+                player.loop = false; // optional
+                player.muted = true; // mute
+                try {
+                  player.pause(); // ensure first frame only
+                } catch {}
+                return (
+                  <VideoView
+                    player={player}
+                    style={{ width: SCREEN_WIDTH, height: VIDEO_HEIGHT }}
+                    contentFit="cover"
+                  />
+                );
+              })()}
+
+              {/* Play icon overlay */}
+              <View className="absolute inset-0 items-center justify-center">
+                <Feather name="play-circle" size={64} color="white" />
+              </View>
+            </TouchableOpacity>
+          ),
+        )}
+      </ScrollView>
+
+      {/* ---------- Media Counter ---------- */}
+      {post.media.length > 1 && (
+        <View className="absolute top-3 right-3 bg-white/40 px-3 py-1 rounded-full">
+          <Text className="text-white text-xs">
+            {activeIndex + 1}/{post.media.length}
+          </Text>
+        </View>
+      )}
+
+      {/* ---------- Actions (likes / comments) ---------- */}
+      <PostActions postId={post.id} />
+
+      {/* ---------- Fullscreen Video Modal ---------- */}
       {openVideoUri && (
-        <Modal animationType="slide" transparent={false} visible={true}>
-          <View style={{ flex: 1, backgroundColor: "black" }}>
-            <PostVideoItem uri={openVideoUri} isActive={true} />
+        <Modal visible animationType="slide">
+          <View className="flex-1 bg-black items-center justify-center">
+            <Text className="text-white text-lg mb-5">
+              Video playback placeholder
+            </Text>
             <TouchableOpacity
               onPress={() => setOpenVideoUri(null)}
-              style={{ position: "absolute", top: 40, right: 20 }}
+              className="absolute top-10 right-5"
             >
-              <Text style={{ color: "white", fontSize: 32 }}>✕</Text>
+              <Text className="text-white text-3xl">✕</Text>
             </TouchableOpacity>
           </View>
         </Modal>

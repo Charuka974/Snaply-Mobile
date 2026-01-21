@@ -189,3 +189,25 @@ export const loadFeedUsers = async (): Promise<User[]> => {
 
   return users;
 };
+
+
+export const getUserById = async (uid: string): Promise<User | null> => {
+  if (!uid) return null;
+
+  const snap = await getDoc(doc(db, "users", uid));
+  if (!snap.exists()) return null;
+
+  const d = snap.data();
+  return {
+    id: snap.id,
+    name: d.name,
+    email: d.email,
+    bio: d.bio,
+    role: d.role,
+    gender: (d.gender ?? "prefer_not_to_say") as Gender,
+    createdAt: d.createdAt?.toDate?.() ?? new Date(),
+    profilePicture: d.profilePicture,
+    followers: d.followers ?? [],
+    following: d.following ?? [],
+  };
+};

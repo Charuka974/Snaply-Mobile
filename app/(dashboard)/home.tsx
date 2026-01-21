@@ -19,10 +19,10 @@ import {
   loadRefreshPosts,
   PostWithUser,
 } from "@/services/postService";
-import { VideoView, useVideoPlayer } from "expo-video";
 import { PostVideo } from "@/components/PostVideoComp";
 import { FeedUser, loadFeedUsers } from "@/services/userService";
-
+import { PostActions } from "@/components/PostActionsComp";
+import { useRouter } from "expo-router";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const VIDEO_HEIGHT = 360;
 
@@ -34,6 +34,7 @@ const Home = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [users, setUsers] = useState<FeedUser[]>([]);
   const [usersLoading, setUsersLoading] = useState(true);
+  const router = useRouter();
 
   // Refs to each video view
   const videoRefs = useRef<Record<string, View | null>>({});
@@ -125,7 +126,16 @@ const Home = () => {
         </View>
         <View className="flex-row">
           <Feather name="heart" size={24} color="#22d3ee" />
-          <Feather name="send" size={24} color="#22d3ee" className="ml-4" />
+
+          <Feather
+            name="send"
+            size={24}
+            color="#22d3ee"
+            className="ml-4"
+            onPress={() => {
+              router.replace(`/(dashboard)/chats`);
+            }}
+          />
         </View>
       </View>
 
@@ -158,7 +168,12 @@ const Home = () => {
               <TouchableOpacity
                 key={user.id}
                 style={{ alignItems: "center", marginRight: 16 }}
-                onPress={() => console.log("Open user profile", user.name)}
+                onPress={() => {
+                  router.replace({
+                    pathname: "/users/[userId]",
+                    params: { userId: user.id },
+                  });
+                }}
               >
                 <Image
                   source={{
@@ -204,10 +219,32 @@ const Home = () => {
                   style={{ width: 40, height: 40, borderRadius: 20 }}
                   className="bg-zinc-700 mr-3"
                 />
-                <Text className="text-white font-semibold">
+                <Text className="text-cyan-400 font-semibold">
                   {post.user.name}
                 </Text>
               </View>
+
+              {/* Caption */}
+              <View className="px-4">
+                <Text
+                  className="text-white font-semibold pb-2"
+                  numberOfLines={2}
+                  ellipsizeMode="tail"
+                >
+                  {post.caption}
+                </Text>
+              </View>
+
+              {/* Tags */}
+              {post.tags?.length > 0 && (
+                <View className="px-4 pb-2 flex-row flex-wrap">
+                  {post.tags.map((tag) => (
+                    <Text key={tag} className="text-cyan-400 text-sm mr-3 mb-1">
+                      #{tag}
+                    </Text>
+                  ))}
+                </View>
+              )}
 
               {/* Media */}
               <ScrollView
@@ -281,34 +318,7 @@ const Home = () => {
               )}
 
               {/* Actions */}
-              <View className="flex-row justify-between px-4 py-3">
-                <View className="flex-row">
-                  <Feather name="heart" size={24} color="#22d3ee" />
-                  <Feather
-                    name="message-circle"
-                    size={24}
-                    color="#22d3ee"
-                    className="ml-4"
-                  />
-                  <Feather
-                    name="send"
-                    size={24}
-                    color="#22d3ee"
-                    className="ml-4"
-                  />
-                </View>
-                <Feather name="bookmark" size={24} color="#22d3ee" />
-              </View>
-
-              {/* Caption */}
-              <View className="px-4">
-                <Text className="text-white">
-                  <Text className="font-semibold text-cyan-400">
-                    {post.user.name}{" "}
-                  </Text>
-                  {post.caption}
-                </Text>
-              </View>
+              <PostActions postId={post.id} />
             </View>
           );
         })}

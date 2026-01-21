@@ -74,7 +74,6 @@ export const ReelItem = ({
   }, [item.id]);
 
   // Likes
-  /* ---------------- Likes ---------------- */
   const [likeCount, setLikeCount] = useState(0);
   const [liked, setLiked] = useState(false);
   const heartIcon = liked ? "heart" : "hearto";
@@ -113,12 +112,12 @@ export const ReelItem = ({
       />
 
       {/* Right Actions */}
-      <View className="absolute right-4 bottom-24 items-center gap-4">
+      <View className="absolute right-4 bottom-40 items-center gap-4">
         <TouchableOpacity onPress={toggleLike} className="items-center">
           <MaterialIcons
             name={liked ? "favorite" : "favorite-border"}
             size={30}
-            color={liked ? "#ef4444" : "white"}
+            color={liked ? "white" : "white"}
           />
           <Text className="text-white text-xs mt-1">{likeCount}</Text>
         </TouchableOpacity>
@@ -129,9 +128,11 @@ export const ReelItem = ({
         >
           <Feather name="message-circle" size={26} color="white" />
           <Text className="text-white text-xs mt-1">
-            {commentCount} {commentCount === 1 ? "Comment" : "Comments"}
+            {commentCount}
+            {/* {commentCount === 1 ? "Comment" : "Comments"} */}
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity className="items-center">
           <Feather name="send" size={26} color="white" />
           <Text className="text-white text-xs mt-1">Share</Text>
@@ -139,16 +140,38 @@ export const ReelItem = ({
       </View>
 
       {/* Bottom Info with Avatar */}
-      <View className="absolute bottom-20 left-4 flex-row items-center gap-3 pb-2">
+      <View
+        style={{
+          position: "absolute",
+          bottom: 60, // leave space above native controls
+          left: 0,
+          width: "100%",
+          paddingHorizontal: 2,
+        }}
+        className="flex-row items-start gap-3"
+      >
         {item.user.profilePicture && (
           <Image
             source={{ uri: item.user.profilePicture }}
-            style={{ width: 40, height: 40, borderRadius: 20 }}
+            style={{ width: 40, height: 40, borderRadius: 20, marginTop: 5 }}
           />
         )}
-        <View>
-          <Text className="text-white font-semibold">@{item.user.name}</Text>
-          <Text className="text-white">{item.caption}</Text>
+        <View style={{ flex: 1 }}>
+          <Text className="text-cyan-400 font-semibold">@{item.user.name}</Text>
+
+          {item.caption && (
+            <Text className="text-white leading-5 mt-1">{item.caption}</Text>
+          )}
+
+          {item.tags?.length > 0 && (
+            <View className="flex-row flex-wrap mt-1">
+              {item.tags.map((tag) => (
+                <Text key={tag} className="text-cyan-400 text-sm mr-3 mb-1">
+                  #{tag}
+                </Text>
+              ))}
+            </View>
+          )}
         </View>
       </View>
     </View>
