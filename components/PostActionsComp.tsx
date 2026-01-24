@@ -14,7 +14,7 @@ import {
   unlikePost,
   subscribeToLikes,
 } from "@/services/LikeService";
-import { subscribeToComments } from "@/services/CommentService";
+import { addComment, subscribeToComments } from "@/services/CommentService";
 
 type Props = {
   postId: string;
@@ -23,6 +23,7 @@ type Props = {
 export const PostActions = ({ postId }: Props) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+  const [comment, setComment] = useState("");
 
   const [commentCount, setCommentCount] = useState(0);
   const [comments, setComments] = useState<any[]>([]);
@@ -58,6 +59,17 @@ export const PostActions = ({ postId }: Props) => {
     });
     return unsub;
   }, [postId]);
+
+  const handleAddComment = async () => {
+    if (!comment.trim() || !postId) return;
+
+    try {
+      await addComment(postId, comment.trim());
+      setComment(""); // clear input after posting
+    } catch (err) {
+      console.error("Failed to add comment:", err);
+    }
+  };
 
   return (
     <View className="px-4">
@@ -125,13 +137,39 @@ export const PostActions = ({ postId }: Props) => {
 
           {/* Optional input (wire to createComment service) */}
           <View className="flex-row items-center mt-2">
-            <TextInput
-              placeholder="Add a comment..."
-              placeholderTextColor="#71717a"
-              className="flex-1 text-white border border-zinc-700 rounded-lg px-3 py-2"
-            />
-            <TouchableOpacity className="ml-3">
-              <Text className="text-cyan-400 font-semibold">Post</Text>
+            <View
+              style={{ height: 40 }}
+              className={`flex-1 flex-row items-center bg-slate-900/40 rounded-full px-4 border ${
+                comment.trim() ? "border-cyan-500/30" : "border-zinc-500/20"
+              }`}
+            >
+              <Feather
+                name="message-circle"
+                size={18}
+                color={comment.trim() ? "#22d3ee" : "#64748b"}
+                className="mr-2"
+              />
+              <TextInput
+                value={comment}
+                onChangeText={setComment}
+                placeholder="Add a comment..."
+                placeholderTextColor="#64748b"
+                className="flex-1 h-full text-white text-[15px]"
+              />
+            </View>
+            <TouchableOpacity
+              disabled={!comment.trim()}
+              style={{ height: 40 }}
+              className={`ml-3 px-5 rounded-full items-center justify-center ${
+                comment.trim() ? "bg-cyan-400" : "bg-zinc-500/20"
+              }`}
+              onPress={handleAddComment}
+            >
+              <Text
+                className={`font-semibold text-[15px] ${comment.trim() ? "text-[#0a0e14]" : "text-zinc-400"}`}
+              >
+                Post
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

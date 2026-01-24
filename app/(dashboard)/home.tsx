@@ -10,6 +10,7 @@ import {
   NativeSyntheticEvent,
   RefreshControl,
   LayoutRectangle,
+  Pressable,
 } from "react-native";
 import React, { useEffect, useState, useRef } from "react";
 import { Feather } from "@expo/vector-icons";
@@ -35,13 +36,11 @@ const Home = () => {
   const [users, setUsers] = useState<FeedUser[]>([]);
   const [usersLoading, setUsersLoading] = useState(true);
   const router = useRouter();
-
+  const [expandedCaptions, setExpandedCaptions] = useState<Record<string, boolean>>({});
   // Refs to each video view
   const videoRefs = useRef<Record<string, View | null>>({});
   // State to track which videos are active
-  const [videoActiveState, setVideoActiveState] = useState<
-    Record<string, boolean>
-  >({});
+  const [videoActiveState, setVideoActiveState] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     loadPosts()
@@ -160,9 +159,10 @@ const Home = () => {
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{
-              paddingHorizontal: 12,
+              paddingHorizontal: 10,
               paddingBottom: 12,
             }}
+            className="border-b border-cyan-500/20 mb-4"
           >
             {users.map((user) => (
               <TouchableOpacity
@@ -211,7 +211,7 @@ const Home = () => {
           const mediaCount = post.media.length;
 
           return (
-            <View key={post.id} className="mb-8">
+            <View key={post.id} className="mb-8 border-b border-cyan-500/20">
               {/* User Header */}
               <View className="flex-row items-center px-4 mb-2">
                 <Image
@@ -226,13 +226,27 @@ const Home = () => {
 
               {/* Caption */}
               <View className="px-4">
-                <Text
-                  className="text-white font-semibold pb-2"
-                  numberOfLines={2}
-                  ellipsizeMode="tail"
+                <Pressable
+                  onPress={() =>
+                    setExpandedCaptions((prev) => ({
+                      ...prev,
+                      [post.id]: !prev[post.id],
+                    }))
+                  }
                 >
-                  {post.caption}
-                </Text>
+                  <Text
+                    className="text-white font-semibold"
+                    numberOfLines={expandedCaptions[post.id] ? undefined : 2}
+                  >
+                    {post.caption}
+                  </Text>
+
+                  {post.caption.length > 40 && (
+                    <Text className="text-gray-400 text-sm mt-1">
+                      {expandedCaptions[post.id] ? "... less" : "read more ..."}
+                    </Text>
+                  )}
+                </Pressable>
               </View>
 
               {/* Tags */}

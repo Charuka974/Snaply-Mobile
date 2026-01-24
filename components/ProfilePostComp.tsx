@@ -12,6 +12,7 @@ import { Feather } from "@expo/vector-icons";
 import { Post } from "@/services/postService";
 import { VideoView, useVideoPlayer } from "expo-video";
 import { PostActions } from "@/components/PostActionsComp";
+import VideoPostThumbnail from "./VideoPostThumbnail";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const VIDEO_HEIGHT = 360;
@@ -76,51 +77,33 @@ export const ProfilePost: React.FC<ProfilePostProps> = ({
         showsHorizontalScrollIndicator={false}
         onScroll={(e) => {
           const index = Math.round(
-            e.nativeEvent.contentOffset.x / SCREEN_WIDTH,
+            e.nativeEvent.contentOffset.x / SCREEN_WIDTH
           );
           setActiveIndex(index);
         }}
         scrollEventThrottle={16}
       >
-        {post.media.map((m, index) =>
-          m.type === "image" ? (
-            <Image
-              key={index}
-              source={{ uri: m.uri }}
-              style={{ width: SCREEN_WIDTH, height: VIDEO_HEIGHT }}
-              resizeMode="cover"
-            />
-          ) : (
-            <TouchableOpacity
-              key={index}
-              onPress={() => setOpenVideoUri(m.uri)}
-              activeOpacity={0.9}
-              style={{ width: SCREEN_WIDTH, height: VIDEO_HEIGHT }}
-            >
-              {/* Video Thumbnail using first frame */}
-              {(() => {
-                const player = useVideoPlayer(m.uri);
-                player.loop = false; // optional
-                player.muted = true; // mute
-                try {
-                  player.pause(); // ensure first frame only
-                } catch {}
-                return (
-                  <VideoView
-                    player={player}
-                    style={{ width: SCREEN_WIDTH, height: VIDEO_HEIGHT }}
-                    contentFit="cover"
-                  />
-                );
-              })()}
-
-              {/* Play icon overlay */}
-              <View className="absolute inset-0 items-center justify-center">
-                <Feather name="play-circle" size={64} color="white" />
-              </View>
-            </TouchableOpacity>
-          ),
-        )}
+        {post.media.map((m, index) => (
+          <TouchableOpacity
+            key={index}
+            onPress={() => m.type === "video" && setOpenVideoUri(m.uri)}
+            activeOpacity={0.9}
+            style={{ width: SCREEN_WIDTH, height: VIDEO_HEIGHT }}
+          >
+            {m.type === "image" ? (
+              <Image
+                source={{ uri: m.uri }}
+                style={{ width: SCREEN_WIDTH, height: VIDEO_HEIGHT }}
+                resizeMode="cover"
+              />
+            ) : (
+              <VideoPostThumbnail
+                media={m}
+                style={{ width: SCREEN_WIDTH, height: VIDEO_HEIGHT }}
+              />
+            )}
+          </TouchableOpacity>
+        ))}
       </ScrollView>
 
       {/* ---------- Media Counter ---------- */}

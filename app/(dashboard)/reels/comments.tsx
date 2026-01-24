@@ -12,7 +12,6 @@ import { useState, useEffect } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { CommentWithUser, addComment, subscribeToComments } from "@/services/CommentService";
 
-const INPUT_HEIGHT = 48;
 
 export default function CommentsScreen() {
   const router = useRouter();
@@ -91,7 +90,7 @@ export default function CommentsScreen() {
       {/* Input */}
       <View className="flex-row items-center px-4 pt-2 pb-4 border-t border-cyan-500/10 bg-[#0f1419]">
         <View
-          style={{ height: INPUT_HEIGHT }}
+          style={{ height: 48 }}
           className={`flex-1 flex-row items-center bg-slate-900/40 rounded-full px-4 border mb-5 ${
             comment.trim() ? "border-cyan-500/30" : "border-zinc-500/20"
           }`}
@@ -113,7 +112,7 @@ export default function CommentsScreen() {
 
         <TouchableOpacity
           disabled={!comment.trim()}
-          style={{ height: INPUT_HEIGHT }}
+          style={{ height: 48 }}
           className={`ml-3 px-5 rounded-full items-center justify-center mb-5 ${
             comment.trim() ? "bg-cyan-400" : "bg-zinc-500/20"
           }`}
