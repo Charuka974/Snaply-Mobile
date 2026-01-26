@@ -133,10 +133,10 @@ export const ReelItem = ({
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="items-center">
+        {/* <TouchableOpacity className="items-center">
           <Feather name="send" size={26} color="white" />
           <Text className="text-white text-xs mt-1">Share</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Bottom Info with Avatar */}

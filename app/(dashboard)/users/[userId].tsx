@@ -2,9 +2,16 @@ import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
 import React, { useState, useEffect } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
-import { getUserById, User } from "@/services/userService";
+import {
+  followUser,
+  getUserById,
+  subscribeToUser,
+  unfollowUser,
+  User,
+} from "@/services/userService";
 import { getUserPosts, PostWithUser } from "@/services/postService";
 import { ProfilePost } from "@/components/ProfilePostComp";
+import { auth } from "@/services/firebase";
 
 const tabs = ["Posts", "Reels", "Photos", "Tagged"] as const;
 
@@ -17,6 +24,8 @@ const UserProfileView = () => {
   const [user, setUser] = useState<User | null>(null);
   const [userPosts, setUserPosts] = useState<PostWithUser[]>([]);
   const [imageError, setImageError] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const currentUserId = auth.currentUser?.uid;
 
   const searchParams = useLocalSearchParams() as Record<
     string,
@@ -29,21 +38,27 @@ const UserProfileView = () => {
   useEffect(() => {
     if (!userId) return;
 
-    const loadUserAndPosts = async () => {
-      try {
-        const userData = await getUserById(userId);
-        setUser(userData);
+    let unsubscribe: (() => void) | undefined;
 
-        if (userData) {
-          const postsData = await getUserPosts(userId);
-          setUserPosts(postsData);
-        }
+    const loadPosts = async () => {
+      try {
+        const postsData = await getUserPosts(userId);
+        setUserPosts(postsData);
       } catch (err) {
-        console.error("Failed to load user/profile:", err);
+        console.error("Failed to load posts:", err);
       }
     };
 
-    loadUserAndPosts();
+    loadPosts();
+
+    unsubscribe = subscribeToUser(userId, (userData) => {
+      setUser(userData);
+      setIsFollowing(userData?.followers?.includes(currentUserId!) ?? false);
+    });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [userId]);
 
   const renderTabContent = () => {
@@ -178,11 +193,37 @@ const UserProfileView = () => {
         </View>
 
         {(user.gender === "male" || user.gender === "female") && (
-          <View className="px-3 py-1 mt-2 self-start bg-blue-500 rounded-full ml-4">
+          <View className="px-3 py-1 mt-2 self-start bg-gray-500 rounded-full ml-4">
             <Text className="text-white text-sm font-semibold">
               {genderLabelMap[user.gender]}
             </Text>
           </View>
+        )}
+
+        {/* Follow User */}
+        {currentUserId !== user.id && (
+          <TouchableOpacity
+            onPress={async () => {
+              if (!user) return;
+              try {
+                if (isFollowing) {
+                  await unfollowUser(currentUserId!, user.id);
+                } else {
+                  await followUser(currentUserId!, user.id);
+                }
+                setIsFollowing(!isFollowing); // Toggle button
+              } catch (err) {
+                console.error(err);
+              }
+            }}
+            className={`mx-4 mt-4 py-2 rounded-full items-center ${
+              isFollowing ? "bg-zinc-700" : "bg-cyan-500"
+            }`}
+          >
+            <Text className="text-white font-semibold">
+              {isFollowing ? "Following" : "Follow"}
+            </Text>
+          </TouchableOpacity>
         )}
 
         {/* Tabs */}

@@ -157,7 +157,7 @@ const Login = () => {
 
             <View className="flex-row justify-center items-center mt-6">
               <Text className="text-zinc-500">Don't have an account? </Text>
-              <TouchableOpacity onPress={() => router.push("/register")}>
+              <TouchableOpacity onPress={() => router.replace("/register")}>
                 <Text className="text-blue-400 font-bold">Register</Text>
               </TouchableOpacity>
             </View>

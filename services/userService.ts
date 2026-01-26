@@ -7,6 +7,8 @@ import {
   onSnapshot,
   getDoc,
   getDocs,
+  arrayUnion,
+  arrayRemove,
 } from "firebase/firestore";
 import { auth, db } from "./firebase";
 import { uploadUserAvatar } from "./uploadService";
@@ -210,4 +212,73 @@ export const getUserById = async (uid: string): Promise<User | null> => {
     followers: d.followers ?? [],
     following: d.following ?? [],
   };
+};
+
+
+// Follow a user
+export const followUser = async (currentUid: string, targetUid: string) => {
+  if (currentUid === targetUid) return; // cannot follow yourself
+
+  const currentUserRef = doc(db, "users", currentUid);
+  const targetUserRef = doc(db, "users", targetUid);
+
+  try {
+    // Add current user to target's followers
+    await updateDoc(targetUserRef, {
+      followers: arrayUnion(currentUid),
+    });
+
+    // Add target user to current user's following
+    await updateDoc(currentUserRef, {
+      following: arrayUnion(targetUid),
+    });
+  } catch (err) {
+    console.error("Failed to follow user:", err);
+    throw err;
+  }
+};
+
+// Unfollow a user
+export const unfollowUser = async (currentUid: string, targetUid: string) => {
+  if (currentUid === targetUid) return; // cannot unfollow yourself
+
+  const currentUserRef = doc(db, "users", currentUid);
+  const targetUserRef = doc(db, "users", targetUid);
+
+  try {
+    // Remove current user from target's followers
+    await updateDoc(targetUserRef, {
+      followers: arrayRemove(currentUid),
+    });
+
+    // Remove target user from current user's following
+    await updateDoc(currentUserRef, {
+      following: arrayRemove(targetUid),
+    });
+  } catch (err) {
+    console.error("Failed to unfollow user:", err);
+    throw err;
+  }
+};
+
+
+export const subscribeToUser = (uid: string, cb: (user: User | null) => void) => {
+  const userRef = doc(db, "users", uid);
+
+  return onSnapshot(userRef, (snap) => {
+    if (!snap.exists()) return cb(null);
+    const d = snap.data();
+    cb({
+      id: snap.id,
+      name: d.name,
+      email: d.email,
+      bio: d.bio,
+      role: d.role,
+      gender: d.gender ?? "prefer_not_to_say",
+      createdAt: d.createdAt?.toDate?.() ?? new Date(),
+      profilePicture: d.profilePicture,
+      followers: d.followers ?? [],
+      following: d.following ?? [],
+    });
+  });
 };

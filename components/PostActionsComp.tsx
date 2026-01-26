@@ -88,7 +88,7 @@ export const PostActions = ({ postId }: Props) => {
             <Feather name="message-circle" size={24} color="#22d3ee" />
           </TouchableOpacity>
 
-          <Feather name="send" size={24} color="#22d3ee" />
+          {/* <Feather name="send" size={24} color="#22d3ee" /> */}
         </View>
 
         <Feather name="bookmark" size={24} color="#22d3ee" />

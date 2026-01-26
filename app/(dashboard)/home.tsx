@@ -36,11 +36,15 @@ const Home = () => {
   const [users, setUsers] = useState<FeedUser[]>([]);
   const [usersLoading, setUsersLoading] = useState(true);
   const router = useRouter();
-  const [expandedCaptions, setExpandedCaptions] = useState<Record<string, boolean>>({});
+  const [expandedCaptions, setExpandedCaptions] = useState<
+    Record<string, boolean>
+  >({});
   // Refs to each video view
   const videoRefs = useRef<Record<string, View | null>>({});
   // State to track which videos are active
-  const [videoActiveState, setVideoActiveState] = useState<Record<string, boolean>>({});
+  const [videoActiveState, setVideoActiveState] = useState<
+    Record<string, boolean>
+  >({});
 
   useEffect(() => {
     loadPosts()
@@ -124,13 +128,19 @@ const Home = () => {
           <Text className="text-cyan-400 text-2xl font-bold ml-2">Snaply</Text>
         </View>
         <View className="flex-row">
-          <Feather name="heart" size={24} color="#22d3ee" />
+          <Feather 
+            name="list" 
+            size={24} color="#22d3ee" 
+            onPress={() => {
+              router.replace(`/(dashboard)/playlists/playlist`);
+            }}
+          />
 
           <Feather
             name="send"
             size={24}
             color="#22d3ee"
-            className="ml-4"
+            className="ml-5"
             onPress={() => {
               router.replace(`/(dashboard)/chats`);
             }}

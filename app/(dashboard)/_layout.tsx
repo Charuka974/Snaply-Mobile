@@ -17,7 +17,9 @@ type MaterialIconName =
   | "add-circle"
   | "movie"
   | "person"
-  | "chat";
+  | "chat"
+  | "playlist-play";
+
 type TabName =
   | "home"
   | "search"
@@ -25,7 +27,8 @@ type TabName =
   | "reels"
   | "profile"
   | "users/[userId]"
-  | "chats";
+  | "chats"
+  | "playlists/playlist";
 
 interface TabBarIconProps {
   name: TabName;
@@ -132,6 +135,7 @@ export default function DashboardLayout() {
     { name: "profile", icon: "person" },
     { name: "users/[userId]", icon: "person" },
     { name: "chats", icon: "chat" },
+    { name: "playlists/playlist", icon: "playlist-play" },
   ];
 
   return (
@@ -166,7 +170,7 @@ export default function DashboardLayout() {
       }}
     >
       {tabs
-        .filter((tab) => tab.name !== "users/[userId]" && tab.name !== "chats")
+        .filter((tab) => tab.name !== "users/[userId]" && tab.name !== "chats" && tab.name !== "playlists/playlist")
         .map(({ name, icon }) => (
           <Tabs.Screen
             key={name}
@@ -188,11 +192,13 @@ export default function DashboardLayout() {
       {/* Hidden routes – no tab bar entry */}
       <Tabs.Screen name="users/[userId]" options={{ href: null }} />
       <Tabs.Screen name="chats" options={{ href: null }} />
+      <Tabs.Screen name="playlists/playlist" options={{ href: null }} />
 
       
     </Tabs>
   );
 }
+
 
 
 
