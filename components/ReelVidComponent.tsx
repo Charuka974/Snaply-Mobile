@@ -13,9 +13,12 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { ReelPost } from "@/services/ReelsService";
 import { subscribeToComments } from "@/services/CommentService";
 import {
+  bookmarkPost,
+  isPostBookmarkedByUser,
   isPostLikedByUser,
   likePost,
   subscribeToLikes,
+  unbookmarkPost,
   unlikePost,
 } from "@/services/LikeService";
 
@@ -30,6 +33,7 @@ export const ReelItem = ({
   const insets = useSafeAreaInsets();
   const videoHeight = screenHeight - insets.top - insets.bottom;
   const router = useRouter();
+  const [bookmarked, setBookmarked] = useState(false);
 
   // Each ReelItem creates & owns its own player
   const player = useVideoPlayer(item.video.uri, (p) => {
@@ -103,6 +107,24 @@ export const ReelItem = ({
     }
   };
 
+  useEffect(() => {
+    isPostBookmarkedByUser(item.id).then(setBookmarked);
+  }, [item.id]);
+
+  const toggleBookmark = async () => {
+    try {
+      if (bookmarked) {
+        await unbookmarkPost(item.id);
+        setBookmarked(false);
+      } else {
+        await bookmarkPost(item.id);
+        setBookmarked(true);
+      }
+    } catch (err) {
+      console.error("Failed to toggle bookmark:", err);
+    }
+  };
+
   return (
     <View style={{ height: videoHeight, width }} className="bg-black">
       <VideoView
@@ -131,6 +153,14 @@ export const ReelItem = ({
             {commentCount}
             {/* {commentCount === 1 ? "Comment" : "Comments"} */}
           </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={toggleBookmark}>
+          <MaterialIcons
+            name={bookmarked ? "bookmark" : "bookmark-border"}
+            size={26}
+            color={bookmarked ? "#22d3ee" : "#64748b"}
+          />
         </TouchableOpacity>
 
         {/* <TouchableOpacity className="items-center">

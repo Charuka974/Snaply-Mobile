@@ -1,4 +1,4 @@
-import { collection, doc, setDoc, serverTimestamp, orderBy, query, getDocs, getDoc, where, onSnapshot } from "firebase/firestore";
+import { collection, doc, setDoc, serverTimestamp, orderBy, query, getDocs, getDoc, where, onSnapshot, deleteDoc } from "firebase/firestore";
 import { db, auth } from "./firebase";
 
 // Comment type
@@ -105,4 +105,24 @@ export const subscribeToComments = (
   });
 
   return unsubscribe;
+};
+
+
+export const deleteComment = async (postId: string, commentId: string): Promise<void> => {
+  const currentUser = auth.currentUser;
+  if (!currentUser) throw new Error("User not authenticated");
+
+  const commentRef = doc(db, "posts", postId, "comments", commentId);
+
+  // Verify ownership
+  const commentSnap = await getDoc(commentRef);
+  if (!commentSnap.exists()) throw new Error("Comment not found");
+
+  const commentData = commentSnap.data();
+  if (commentData.userId !== currentUser.uid) {
+    throw new Error("You can only delete your own comments");
+  }
+
+  // Delete comment
+  await deleteDoc(commentRef);
 };

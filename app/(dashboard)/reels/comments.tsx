@@ -10,8 +10,13 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { CommentWithUser, addComment, subscribeToComments } from "@/services/CommentService";
-
+import {
+  CommentWithUser,
+  addComment,
+  deleteComment,
+  subscribeToComments,
+} from "@/services/CommentService";
+import { auth } from "@/services/firebase";
 
 export default function CommentsScreen() {
   const router = useRouter();
@@ -58,33 +63,59 @@ export default function CommentsScreen() {
         data={comments}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16 }}
-        renderItem={({ item }) => (
-          <View className="mb-5 p-3.5 rounded-xl border-l-4 border-cyan-500 bg-slate-900/30 flex-row gap-3">
-            {/* Avatar */}
-            {item.avatar ? (
-              <Image
-                source={{ uri: item.avatar }}
-                style={{ width: 36, height: 36, borderRadius: 18 }}
-              />
-            ) : (
-              <View className="w-9 h-9 rounded-full bg-zinc-700" style={{ width: 36, height: 36, borderRadius: 18 }} />
-            )}
+        renderItem={({ item }) => {
+          const isMyComment = auth.currentUser?.uid === item.userId;
 
-            <View className="flex-1">
-              <View className="flex-row items-center justify-between mb-1">
-                <Text className="text-cyan-500 font-semibold text-sm">
-                  @{item.username}
-                </Text>
-                <Text className="text-zinc-400 text-xs">
-                  {item.createdAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          return (
+            <View className="mb-5 p-3.5 rounded-xl border-l-4 border-cyan-500 bg-slate-900/30 flex-row gap-3">
+              {/* Avatar */}
+              {item.avatar ? (
+                <Image
+                  source={{ uri: item.avatar }}
+                  style={{ width: 36, height: 36, borderRadius: 18 }}
+                />
+              ) : (
+                <View
+                  className="w-9 h-9 rounded-full bg-zinc-700"
+                  style={{ width: 36, height: 36, borderRadius: 18 }}
+                />
+              )}
+
+              <View className="flex-1">
+                <View className="flex-row items-center justify-between mb-1">
+                  <Text className="text-cyan-500 font-semibold text-sm">
+                    @{item.username}
+                  </Text>
+                  <View className="flex-row items-center gap-2">
+                    <Text className="text-zinc-400 text-xs">
+                      {item.createdAt.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </Text>
+
+                    {isMyComment && (
+                      <TouchableOpacity
+                        onPress={async () => {
+                          try {
+                            await deleteComment(postId, item.id);
+                          } catch (err) {
+                            console.error("Failed to delete comment:", err);
+                          }
+                        }}
+                      >
+                        <Feather name="trash-2" size={16} color="#ef4444" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+                <Text className="text-slate-200 text-[15px] leading-5">
+                  {item.text}
                 </Text>
               </View>
-              <Text className="text-slate-200 text-[15px] leading-5">
-                {item.text}
-              </Text>
             </View>
-          </View>
-        )}
+          );
+        }}
       />
 
       {/* Input */}
@@ -118,7 +149,9 @@ export default function CommentsScreen() {
           }`}
           onPress={handleAddComment}
         >
-          <Text className={`font-semibold text-[15px] ${comment.trim() ? "text-[#0a0e14]" : "text-zinc-400"}`}>
+          <Text
+            className={`font-semibold text-[15px] ${comment.trim() ? "text-[#0a0e14]" : "text-zinc-400"}`}
+          >
             Post
           </Text>
         </TouchableOpacity>

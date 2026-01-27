@@ -21,7 +21,7 @@ import {
   PostWithUser,
 } from "@/services/postService";
 import { PostVideo } from "@/components/PostVideoComp";
-import { FeedUser, loadFeedUsers } from "@/services/userService";
+import { FeedUser, loadFeedUsers, loadMyData } from "@/services/userService";
 import { PostActions } from "@/components/PostActionsComp";
 import { useRouter } from "expo-router";
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -45,6 +45,19 @@ const Home = () => {
   const [videoActiveState, setVideoActiveState] = useState<
     Record<string, boolean>
   >({});
+  const [currentUser, setCurrentUser] = useState<FeedUser | null>(null);
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const me = await loadMyData(); // returns FeedUser
+        setCurrentUser(me);
+      } catch (err) {
+        console.error("Failed to load current user:", err);
+      }
+    };
+    fetchCurrentUser();
+  }, []);
 
   useEffect(() => {
     loadPosts()
@@ -128,9 +141,10 @@ const Home = () => {
           <Text className="text-cyan-400 text-2xl font-bold ml-2">Snaply</Text>
         </View>
         <View className="flex-row">
-          <Feather 
-            name="list" 
-            size={24} color="#22d3ee" 
+          <Feather
+            name="list"
+            size={24}
+            color="#22d3ee"
             onPress={() => {
               router.replace(`/(dashboard)/playlists/playlist`);
             }}
@@ -174,21 +188,23 @@ const Home = () => {
             }}
             className="border-b border-cyan-500/20 mb-4"
           >
-            {users.map((user) => (
+            {/* Always show current user first */}
+            {currentUser && (
               <TouchableOpacity
-                key={user.id}
+                key={currentUser.id}
                 style={{ alignItems: "center", marginRight: 16 }}
                 onPress={() => {
                   router.replace({
                     pathname: "/users/[userId]",
-                    params: { userId: user.id },
+                    params: { userId: currentUser.id },
                   });
                 }}
               >
                 <Image
                   source={{
                     uri:
-                      user.profilePicture || "https://via.placeholder.com/150",
+                      currentUser.profilePicture ||
+                      "https://via.placeholder.com/150",
                   }}
                   style={{
                     width: 60,
@@ -208,10 +224,53 @@ const Home = () => {
                   }}
                   numberOfLines={1}
                 >
-                  {user.name}
+                  You
                 </Text>
               </TouchableOpacity>
-            ))}
+            )}
+
+            {/* Then render all other users excluding current user */}
+            {users
+              .filter((user) => user.id !== currentUser?.id)
+              .map((user) => (
+                <TouchableOpacity
+                  key={user.id}
+                  style={{ alignItems: "center", marginRight: 16 }}
+                  onPress={() => {
+                    router.replace({
+                      pathname: "/users/[userId]",
+                      params: { userId: user.id },
+                    });
+                  }}
+                >
+                  <Image
+                    source={{
+                      uri:
+                        user.profilePicture ||
+                        "https://via.placeholder.com/150",
+                    }}
+                    style={{
+                      width: 60,
+                      height: 60,
+                      borderRadius: 30,
+                      borderWidth: 2,
+                      borderColor: "#22d3ee",
+                    }}
+                  />
+                  <Text
+                    style={{
+                      color: "white",
+                      fontSize: 12,
+                      marginTop: 4,
+                      maxWidth: 60,
+                      textAlign: "center",
+                    }}
+                    numberOfLines={1}
+                  >
+                    {user.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
           </ScrollView>
         )}
 

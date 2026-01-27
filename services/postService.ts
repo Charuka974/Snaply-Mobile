@@ -9,6 +9,8 @@ import {
   getDoc,
   where,
   onSnapshot,
+  deleteDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { db, auth } from "./firebase";
 import { MediaType } from "./uploadService";
@@ -71,7 +73,7 @@ export const createPost = async ({
 };
 
 // --- Helper: Build User Object ---
-const buildUser = (userId: string, userData: any): User => ({
+export const buildUser = (userId: string, userData: any): User => ({
   id: userId,
   name: userData?.name || "Unknown",
   email: userData?.email || "",
@@ -262,6 +264,48 @@ export const getUserPosts = async (userId: string): Promise<PostWithUser[]> => {
     })
     .filter(Boolean) as PostWithUser[];
 };
+
+
+// --- Edit Post (caption + tags only) ---
+export const editPost = async (
+  postId: string,
+  updates: { caption?: string; tags?: string[] }
+): Promise<void> => {
+  const currentUser = auth.currentUser;
+  if (!currentUser) throw new Error("User not authenticated");
+
+  const postRef = doc(db, "posts", postId);
+
+  // Only allow current user to edit their own post
+  const postSnap = await getDoc(postRef);
+  if (!postSnap.exists()) throw new Error("Post not found");
+  const postData = postSnap.data();
+  if (postData.userId !== currentUser.uid)
+    throw new Error("You can only edit your own posts");
+
+  await updateDoc(postRef, {
+    ...updates,
+  });
+};
+
+// --- Delete Post ---
+export const deletePost = async (postId: string): Promise<void> => {
+  const currentUser = auth.currentUser;
+  if (!currentUser) throw new Error("User not authenticated");
+
+  const postRef = doc(db, "posts", postId);
+
+  // Only allow current user to delete their own post
+  const postSnap = await getDoc(postRef);
+  if (!postSnap.exists()) throw new Error("Post not found");
+  const postData = postSnap.data();
+  if (postData.userId !== currentUser.uid)
+    throw new Error("You can only delete your own posts");
+
+  await deleteDoc(postRef);
+};
+
+
 
 
 

@@ -13,8 +13,16 @@ import {
   likePost,
   unlikePost,
   subscribeToLikes,
+  bookmarkPost,
+  unbookmarkPost,
+  isPostBookmarkedByUser,
 } from "@/services/LikeService";
-import { addComment, subscribeToComments } from "@/services/CommentService";
+import {
+  addComment,
+  deleteComment,
+  subscribeToComments,
+} from "@/services/CommentService";
+import { auth } from "@/services/firebase";
 
 type Props = {
   postId: string;
@@ -28,6 +36,7 @@ export const PostActions = ({ postId }: Props) => {
   const [commentCount, setCommentCount] = useState(0);
   const [comments, setComments] = useState<any[]>([]);
   const [expanded, setExpanded] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
 
   /* ---------------- Likes ---------------- */
   useEffect(() => {
@@ -41,6 +50,10 @@ export const PostActions = ({ postId }: Props) => {
     return unsub;
   }, [postId]);
 
+  useEffect(() => {
+    isPostBookmarkedByUser(postId).then(setBookmarked);
+  }, [postId]);
+
   const toggleLike = async () => {
     if (liked) {
       await unlikePost(postId);
@@ -48,6 +61,20 @@ export const PostActions = ({ postId }: Props) => {
     } else {
       await likePost(postId);
       setLiked(true);
+    }
+  };
+
+  const toggleBookmark = async () => {
+    try {
+      if (bookmarked) {
+        await unbookmarkPost(postId);
+        setBookmarked(false);
+      } else {
+        await bookmarkPost(postId);
+        setBookmarked(true);
+      }
+    } catch (err) {
+      console.error("Failed to toggle bookmark:", err);
     }
   };
 
@@ -88,10 +115,18 @@ export const PostActions = ({ postId }: Props) => {
             <Feather name="message-circle" size={24} color="#22d3ee" />
           </TouchableOpacity>
 
-          {/* <Feather name="send" size={24} color="#22d3ee" /> */}
+          {/* <TouchableOpacity>
+            <Feather name="send" size={24} color="#22d3ee" />
+          </TouchableOpacity> */}
         </View>
 
-        <Feather name="bookmark" size={24} color="#22d3ee" />
+        <TouchableOpacity onPress={toggleBookmark}>
+          <MaterialIcons
+            name={bookmarked ? "bookmark" : "bookmark-border"}
+            size={26}
+            color={bookmarked ? "#22d3ee" : "#64748b"}
+          />
+        </TouchableOpacity>
       </View>
 
       {/* Counts */}
@@ -108,31 +143,55 @@ export const PostActions = ({ postId }: Props) => {
             data={comments}
             keyExtractor={(item) => item.id}
             scrollEnabled={false}
-            renderItem={({ item }) => (
-              <View className="flex-row mb-3 px-2">
-                {/* Avatar */}
-                {item.avatar ? (
-                  <Image
-                    source={{ uri: item.avatar }}
-                    style={{ width: 32, height: 32, borderRadius: 16 }}
-                    className="bg-zinc-700 mr-3"
-                  />
-                ) : (
-                  <View
-                    style={{ width: 32, height: 32, borderRadius: 16 }}
-                    className="bg-zinc-700 mr-3"
-                  />
-                )}
+            renderItem={({ item }) => {
+              const isMyComment = auth.currentUser?.uid === item.userId;
 
-                {/* Username + Comment */}
-                <View className="flex-1">
-                  <Text className="font-semibold text-cyan-400 text-sm">
-                    @{item.username ?? "unknown"}
-                  </Text>
-                  <Text className="text-white text-sm mt-0.5">{item.text}</Text>
+              return (
+                <View className="flex-row mb-3 px-2">
+                  {/* Avatar */}
+                  {item.avatar ? (
+                    <Image
+                      source={{ uri: item.avatar }}
+                      style={{ width: 32, height: 32, borderRadius: 16 }}
+                      className="bg-zinc-700 mr-3"
+                    />
+                  ) : (
+                    <View
+                      style={{ width: 32, height: 32, borderRadius: 16 }}
+                      className="bg-zinc-700 mr-3"
+                    />
+                  )}
+
+                  {/* Username + Comment */}
+                  <View className="flex-1 flex-row justify-between items-start">
+                    <View className="flex-1">
+                      <Text className="font-semibold text-cyan-400 text-sm">
+                        @{item.username ?? "unknown"}
+                      </Text>
+                      <Text className="text-white text-sm mt-0.5">
+                        {item.text}
+                      </Text>
+                    </View>
+
+                    {/* Delete button for my comments */}
+                    {isMyComment && (
+                      <TouchableOpacity
+                        onPress={async () => {
+                          try {
+                            await deleteComment(postId, item.id);
+                          } catch (err) {
+                            console.error("Failed to delete comment:", err);
+                          }
+                        }}
+                        className="ml-2"
+                      >
+                        <Feather name="trash-2" size={16} color="#ef4444" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
                 </View>
-              </View>
-            )}
+              );
+            }}
           />
 
           {/* Optional input (wire to createComment service) */}

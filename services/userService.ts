@@ -24,6 +24,8 @@ export type User = {
   profilePicture?: string;
   followers?: string[];
   following?: string[];
+  likedPosts?: string[];
+  bookmarkedPosts?: string[];
 };
 
 export type FeedUser = {
@@ -37,6 +39,8 @@ export type FeedUser = {
   profilePicture?: string;
   followers?: string[];
   following?: string[];
+  likedPosts?: string[];
+  bookmarkedPosts?: string[];
 };
 
 export type Gender =
@@ -104,6 +108,8 @@ export const loadMyData = async (): Promise<User | null> => {
     profilePicture: d.profilePicture,
     followers: d.followers ?? [],
     following: d.following ?? [],
+    likedPosts: d.likedPosts ?? [],
+    bookmarkedPosts: d.bookmarkedPosts ?? [],
   };
 };
 
@@ -164,6 +170,8 @@ export const subscribeToMyData = (cb: (u: User | null) => void) => {
       profilePicture: d.profilePicture,
       followers: d.followers ?? [],
       following: d.following ?? [],
+      likedPosts: d.likedPosts ?? [],
+      bookmarkedPosts: d.bookmarkedPosts ?? [],
     });
   });
 };
@@ -186,6 +194,8 @@ export const loadFeedUsers = async (): Promise<User[]> => {
       profilePicture: d.profilePicture,
       followers: d.followers ?? [],
       following: d.following ?? [],
+      likedPosts: d.likedPosts ?? [],
+      bookmarkedPosts: d.bookmarkedPosts ?? [],
     };
   });
 
@@ -211,6 +221,8 @@ export const getUserById = async (uid: string): Promise<User | null> => {
     profilePicture: d.profilePicture,
     followers: d.followers ?? [],
     following: d.following ?? [],
+    likedPosts: d.likedPosts ?? [],
+    bookmarkedPosts: d.bookmarkedPosts ?? [],
   };
 };
 
@@ -279,6 +291,8 @@ export const subscribeToUser = (uid: string, cb: (user: User | null) => void) =>
       profilePicture: d.profilePicture,
       followers: d.followers ?? [],
       following: d.following ?? [],
+      likedPosts: d.likedPosts ?? [],
+      bookmarkedPosts: d.bookmarkedPosts ?? [],
     });
   });
 };
