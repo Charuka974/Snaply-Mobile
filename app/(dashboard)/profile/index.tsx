@@ -20,7 +20,7 @@ import { ProfilePost } from "@/components/ProfilePostComp";
 import { logout } from "@/services/authService";
 import Toast from "react-native-toast-message";
 
-const tabs = ["Posts", "Reels", "Photos", "Tagged"] as const;
+const tabs = ["Posts", "Reels", "Photos"] as const;
 
 const ProfileIndex = () => {
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]>("Posts");
@@ -131,12 +131,12 @@ const ProfileIndex = () => {
           </View>
         );
 
-      case "Tagged":
-        return (
-          <View className="flex-1 justify-center items-center py-20">
-            <Text className="text-white">No tagged posts yet</Text>
-          </View>
-        );
+      // case "Tagged":
+      //   return (
+      //     <View className="flex-1 justify-center items-center py-20">
+      //       <Text className="text-white">No tagged posts yet</Text>
+      //     </View>
+      //   );
     }
   };
 
