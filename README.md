@@ -130,12 +130,6 @@ Snaply focuses on **performance, scalability, and smooth mobile UX**, with a bac
 
 ---
 
-Gotcha 👍 — you want **this exact section rewritten for *your* app**, keeping the **same table style**, but **correct for Snaply (React Native + Expo + Firebase + Cloudinary)**.
-
-Here’s a **drop-in replacement**. You can delete your current Tech Stack section and paste this as-is.
-
----
-
 ## 🧰 Tech Stack
 
 ### 📱 Frontend (Mobile App)
@@ -173,10 +167,6 @@ Here’s a **drop-in replacement**. You can delete your current Tech Stack secti
 
 **Collections:**
 `users`, `posts`, `comments`, `likes`, `messages`, `chat`
-
----
-
-Perfect! We can **update the Tools & Platforms section** to include **VS Code** along with Expo Go. Here’s a clean, final version for your Snaply README:
 
 ---
 
@@ -339,7 +329,6 @@ EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET=your_upload_preset
 
 Charuka Dev
 Full-stack Developer
-Focused on SaaS, AI, and cloud-based solutions
 
 ---
 
