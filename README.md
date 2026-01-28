@@ -33,37 +33,38 @@ Snaply focuses on **performance, scalability, and smooth mobile UX**, with a bac
 ## 📸 Snaply Mobile App Screenshots
 
 ### Feed
-![Feed 1](./prt-sc-images/feed1.jpeg)
-![Feed 2](./prt-sc-images/feed2.jpeg)
+<img src="./prt-sc-images/feed1.jpeg" width="250px" />
+<img src="./prt-sc-images/feed2.jpeg" width="250px" />
 
 ### Bookmarked
-![Bookmarked](./prt-sc-images/bookmarked.jpeg)
+<img src="./prt-sc-images/bookmarked.jpeg" width="250px" />
 
 ### Liked Posts
-![Liked](./prt-sc-images/liked.jpeg)
+<img src="./prt-sc-images/liked.jpeg" width="250px" />
 
 ### Reels
-![Reels](./prt-sc-images/reels.jpeg)
-![Reel Comments](./prt-sc-images/reelcomment.jpeg)
+<img src="./prt-sc-images/reels.jpeg" width="250px" />
+<img src="./prt-sc-images/reelcomment.jpeg" width="250px" />
 
 ### Chat
-![Chat Messages](./prt-sc-images/chatmessages.jpeg)
-![Chat Users](./prt-sc-images/chatusers.jpeg)
+<img src="./prt-sc-images/chatmessages.jpeg" width="250px" />
+<img src="./prt-sc-images/chatusers.jpeg" width="250px" />
 
 ### Search
-![Search](./prt-sc-images/search.jpeg)
+<img src="./prt-sc-images/search.jpeg" width="250px" />
 
 ### Create Post
-![Create Post](./prt-sc-images/create.jpeg)
+<img src="./prt-sc-images/create.jpeg" width="250px" />
 
 ### Profile
-![Profile](./prt-sc-images/profile.jpeg)
+<img src="./prt-sc-images/profile.jpeg" width="250px" />
 
 ### Login
-![Login](./prt-sc-images/login.jpeg)
+<img src="./prt-sc-images/login.jpeg" width="250px" />
 
 ### Register
-![Register](./prt-sc-images/register.jpeg)
+<img src="./prt-sc-images/register.jpeg" width="250px" />
+
 
 ---
 
