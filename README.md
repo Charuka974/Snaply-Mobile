@@ -24,9 +24,15 @@ Snaply focuses on **performance, scalability, and smooth mobile UX**, with a bac
 
 ---
 
-## Download The .apk file
+### Download The .apk File
 
-
+<p align="center">
+  <a href="/apk-files/application-b8843a5e-0949-422f-a6a4-c95019f7e33a.apk" download>
+    <button style="background-color:#4CAF50; color:white; padding:12px 24px; border:none; border-radius:6px; cursor:pointer; font-size:16px; font-weight:bold;">
+      ⬇️ Download Snaply.apk
+    </button>
+  </a>
+</p>
 
 ---
 
