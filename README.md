@@ -34,43 +34,58 @@ Snaply focuses on **performance, scalability, and smooth mobile UX**, with a bac
   </a>
 </p>
 
+
 ---
 
-## 📸 Snaply Mobile App Screenshots
+## 📱 Snaply App Gallery
 
-### Feed
-<img src="./prt-sc-images/feed1.jpeg" width="250px" />
-<img src="./prt-sc-images/feed2.jpeg" width="250px" />
+### 🏠 Discovery & Feed
 
-### Bookmarked
-<img src="./prt-sc-images/bookmarked.jpeg" width="250px" />
+The core experience where users browse content and interact with the community.
 
-### Liked Posts
-<img src="./prt-sc-images/liked.jpeg" width="250px" />
+| Feed View | Exploration |
+| --- | --- |
+| <img src="./prt-sc-images/feed1.jpeg" width="250px" /> | <img src="./prt-sc-images/feed2.jpeg" width="250px" /> |
 
-### Reels
-<img src="./prt-sc-images/reels.jpeg" width="250px" />
-<img src="./prt-sc-images/reelcomment.jpeg" width="250px" />
+---
 
-### Chat
-<img src="./prt-sc-images/chatmessages.jpeg" width="250px" />
-<img src="./prt-sc-images/chatusers.jpeg" width="250px" />
+### 🎬 Reels & Engagement
 
-### Search
-<img src="./prt-sc-images/search.jpeg" width="250px" />
+Short-form video content and the social interaction layer.
 
-### Create Post
-<img src="./prt-sc-images/create.jpeg" width="250px" />
+| Video Feed | Community Discussion |
+| --- | --- |
+| <img src="./prt-sc-images/reels.jpeg" width="250px" /> | <img src="./prt-sc-images/reelcomment.jpeg" width="250px" /> |
 
-### Profile
-<img src="./prt-sc-images/profile.jpeg" width="250px" />
+---
 
-### Login
-<img src="./prt-sc-images/login.jpeg" width="250px" />
+### 💬 Messaging & Social
 
-### Register
-<img src="./prt-sc-images/register.jpeg" width="250px" />
+Direct communication and user search functionality.
 
+| Active Conversations | User Directory | Global Search |
+| --- | --- | --- |
+| <img src="./prt-sc-images/chatmessages.jpeg" width="250px" /> | <img src="./prt-sc-images/chatusers.jpeg" width="250px" /> | <img src="./prt-sc-images/search.jpeg" width="250px" /> |
+
+---
+
+### 👤 Profile & Personal Collections
+
+Where users manage their identity and saved content.
+
+| User Profile | Bookmarks | Liked Content |
+| --- | --- | --- |
+| <img src="./prt-sc-images/profile.jpeg" width="250px" /> | <img src="./prt-sc-images/bookmarked.jpeg" width="250px" /> | <img src="./prt-sc-images/liked.jpeg" width="250px" /> |
+
+---
+
+### 🛠️ Creation & Authentication
+
+The entry points and content generation tools.
+
+| Post Creation | Login | Registration |
+| --- | --- | --- |
+| <img src="./prt-sc-images/create.jpeg" width="250px" /> | <img src="./prt-sc-images/login.jpeg" width="250px" /> | <img src="./prt-sc-images/register.jpeg" width="250px" /> |
 
 ---
 
